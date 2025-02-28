@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call of Duty League Statistics Tracker</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --dark: #1a1a1a;
+            --light: #f5f5f5;
+            --accent: #3498db;
+            --secondary: #333;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-left: 15px;
+        }
+        
+        .logo-icon {
+            background-color: var(--primary);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        
+        .search-filter {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .search-bar {
+            flex-grow: 1;
+            max-width: 500px;
+            position: relative;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 12px 20px;
+            background-color: var(--secondary);
+            border: none;
+            border-radius: 30px;
+            color: var(--light);
+            font-size: 1rem;
+        }
+        
+        .search-bar input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+        
+        .search-bar button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .filters select {
+            padding: 10px 15px;
+            background-color: var(--secondary);
+            color: var(--light);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .filters select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background-color: var(--secondary);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            font-size: 1.2rem;
+            color: var(--light);
+            margin-bottom: 15px;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .stat-subtitle {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: var(--secondary);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--primary);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        .data-table tr {
+            border-bottom: 1px solid #333;
+        }
+        
+        .data-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .data-table td {
+            position: relative;
+        }
+        
+        .player-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .team-logo {
+            width: 25px;
+            height: 25px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .chart-container {
+            margin-top: 40px;
+            background-color: var(--secondary);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .chart-title {
+            font-size: 1.5rem;
+            color: var(--light);
+        }
+        
+        .chart-options select {
+            padding: 8px 15px;
+            background-color: var(--dark);
+            color: var(--light);
+            border: none;
+            border-radius: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 25px;
+            background-color: var(--secondary);
+            border: none;
+            border-radius: 30px;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-live {
+            background-color: var(--success);
+        }
+        
+        .status-offline {
+            background-color: var(--danger);
+        }
+        
+        .update-info {
+            text-align: right;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .positive {
+            color: var(--success);
+        }
+        
+        .negative {
+            color: var(--danger);
+        }
+        
+        .kd-ratio {
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .search-filter {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+            
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+
+        .content-section {
+            display: none; /* Hide all sections by default */
+        }
+        
+        .content-section.active {
+            display: block; /* Show the active section */
+        }
+
+        /* New styles for Teams section */
+        .team-roster {
+            background-color: var(--secondary);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .team-roster:hover {
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+
+        .team-roster h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .team-roster ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .team-roster li {
+            padding: 8px;
+            border-bottom: 1px solid #444;
+        }
+
+        .team-roster li:last-child {
+            border-bottom: none;
+        }
+
+        .match-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+            font-size: 1.5rem; /* Adjust size as needed */
+            color: var(--light);
+        }
+
+        .team-name {
+            font-weight: bold;
+            color: var(--primary); /* Use primary color for team names */
+            margin: 0 10px;
+        }
+
+        .vs {
+            font-size: 1.5rem; /* Adjust size as needed */
+            color: var(--light);
+            margin: 0 10px;
+        }
+
+        .recent-match, .upcoming-match {
+            background-color: var(--secondary);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .recent-match:hover, .upcoming-match:hover {
+            background-color: rgba(46, 204, 113, 0.1); /* Lighten on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">CDL</div>
+                <h1>Call of Duty League Stats Tracker</h1>
+            </div>
+            <div class="status">
+                <span class="status-indicator status-live"></span>
+                <span>LIVE UPDATES</span>
+            </div>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab active">Players</button>
+            <button class="tab">Standings</button>
+            <button class="tab">Matches</button>
+            <button class="tab">Teams</button>
+        </div>
+        
+        <div class="search-filter">
+            <div class="search-bar">
+                <input type="text" placeholder="Search for player or team...">
+                <button>🔍</button>
+            </div>
+            <div class="filters">
+                <select>
+                    <option>All Teams</option>
+                    <option>Atlanta FaZe</option>
+                    <option>Los Angeles Thieves</option>
+                    <option>Carolina Royal Ravens</option>
+                    <option>OpTic Texas</option>
+                    <option>Toronto Ultra</option>
+                    <option>Minnesota RØKKR</option>
+                    <option>Boston Breach</option>
+                    <option>Cloud9 New York</option>
+                    <option>Los Angeles Guerrillas M8</option>
+                    <option>Las Vegas Falcons</option>
+                    <option>Vancouver Surge</option>
+                    <option>Miami Heretics</option>
+                </select>
+                <select>
+                    <option>All Modes</option>
+                    <option>Search & Destroy</option>
+                    <option>Hardpoint</option>
+                    <option>Control</option>
+                </select>
+                <select>
+                    <option>Sort By: K/D (High-Low)</option>
+                    <option>Sort By: Kills (High-Low)</option>
+                    <option>Sort By: Maps Played (High-Low)</option>
+                    <option>Sort By: Win % (High-Low)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Matches Tracked</h3>
+                <div class="stat-value">483</div>
+                <div class="stat-subtitle">Black Ops 6 Season</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Maps Played</h3>
+                <div class="stat-value">2,119</div>
+                <div class="stat-subtitle">Across all teams</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Kills</h3>
+                <div class="stat-value">39,482</div>
+                <div class="stat-subtitle">All player kills combined</div>
+            </div>
+            <div class="stat-card">
+                <h3>Average K/D Ratio</h3>
+                <div class="stat-value">1.078</div>
+                <div class="stat-subtitle">League-wide average</div>
+            </div>
+        </div>
+        
+        <div class="content-section active" id="players-section">
+            <h2>Player Statistics - Black Ops 6 Season</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Maps Played</th>
+                        <th>Maps Won</th>
+                        <th>Maps Lost</th>
+                        <th>Win %</th>
+                        <th>Kills</th>
+                        <th>Deaths</th>
+                        <th>K/D Ratio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="player-name">
+                                <div class="team-logo">AF</div>
+                                Cellium
+                            </div>
+                        </td>
+                        <td>74</td>
+                        <td>54</td>
+                        <td>20</td>
+                        <td>73.0%</td>
+                        <td>1,424</td>
+                        <td>1,231</td>
+                        <td class="kd-ratio positive">1.157</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="player-name">
+                                <div class="team-logo">LT</div>
+                                Scrappy
+                            </div>
+                        </td>
+                        <td>68</td>
+                        <td>47</td>
+                        <td>21</td>
+                        <td>69.1%</td>
+                        <td>1,373</td>
+                        <td>1,224</td>
+                        <td class="kd-ratio positive">1.122</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="player-name">
+                                <div class="team-logo">CR</div>
+                                Gwinn
+                            </div>
+                        </td>
+                        <td>77</td>
+                        <td>46</td>
+                        <td>31</td>
+                        <td>59.7%</td>
+                        <td>1,577</td>
+                        <td>1,429</td>
+                        <td class="kd-ratio positive">1.104</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="player-name">
+                                <div class="team-logo">AF</div>
+                                Simp
+                            </div>
+                        </td>
+                        <td>74</td>
+                        <td>54</td>
+                        <td>20</td>
+                        <td>73.0%</td>
+                        <td>1,475</td>
+                        <td>1,338</td>
+                        <td class="kd-ratio positive">1.102</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="player-name">
+                                <div class="team-logo">OT</div>
+                                Shotzzy
+                            </div>
+                        </td>
+                        <td>66</td>
+                        <td>45</td>
+                        <td>21</td>
+                        <td>68.2%</td>
+                        <td>1,352</td>
+                        <td>1,216</td>
+                        <td class="kd-ratio positive">1.112</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="player-name">
+                                <div class="team-logo">OT</div>
+                                Huke
+                            </div>
+                        </td>
+                        <td>49</td>
+                        <td>34</td>
+                        <td>15</td>
+                        <td>69.4%</td>
+                        <td>964</td>
+                        <td>836</td>
+                        <td class="kd-ratio positive">1.153</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="player-name">
+                                <div class="team-logo">LT</div>
+                                HyDra
+                            </div>
+                        </td>
+                        <td>68</td>
+                        <td>47</td>
+                        <td>21</td>
+                        <td>69.1%</td>
+                        <td>1,365</td>
+                        <td>1,262</td>
+                        <td class="kd-ratio positive">1.082</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="player-name">
+                                <div class="team-logo">MR</div>
+                                Gio
+                            </div>
+                        </td>
+                        <td>73</td>
+                        <td>41</td>
+                        <td>32</td>
+                        <td>56.2%</td>
+                        <td>1,424</td>
+                        <td>1,335</td>
+                        <td class="kd-ratio positive">1.067</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="player-name">
+                                <div class="team-logo">BB</div>
+                                Snoopy
+                            </div>
+                        </td>
+                        <td>62</td>
+                        <td>36</td>
+                        <td>26</td>
+                        <td>58.1%</td>
+                        <td>1,189</td>
+                        <td>1,105</td>
+                        <td class="kd-ratio positive">1.076</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="player-name">
+                                <div class="team-logo">VS</div>
+                                Neptune
+                            </div>
+                        </td>
+                        <td>13</td>
+                        <td>8</td>
+                        <td>5</td>
+                        <td>61.5%</td>
+                        <td>317</td>
+                        <td>270</td>
+                        <td class="kd-ratio positive">1.174</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="update-info">
+                <p>Last updated: <span id="update-time">February 27, 2025 - 16:42 EST</span></p>
+            </div>
+        </div>
+        
+        <div class="content-section" id="standings-section">
+            <h2>Standings - Black Ops 6 Season</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Team</th>
+                        <th>Maps Played</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Map Win %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Atlanta FaZe</td>
+                        <td>40</td>
+                        <td>30</td>
+                        <td>10</td>
+                        <td>75.0%</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Los Angeles Thieves</td>
+                        <td>40</td>
+                        <td>28</td>
+                        <td>12</td>
+                        <td>70.0%</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>OpTic Texas</td>
+                        <td>40</td>
+                        <td>25</td>
+                        <td>15</td>
+                        <td>62.5%</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Toronto Ultra</td>
+                        <td>40</td>
+                        <td>22</td>
+                        <td>18</td>
+                        <td>55.0%</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Carolina Royal Ravens</td>
+                        <td>40</td>
+                        <td>20</td>
+                        <td>20</td>
+                        <td>50.0%</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Minnesota RØKKR</td>
+                        <td>40</td>
+                        <td>19</td>
+                        <td>21</td>
+                        <td>47.5%</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Boston Breach</td>
+                        <td>40</td>
+                        <td>18</td>
+                        <td>22</td>
+                        <td>45.0%</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Vancouver Surge</td>
+                        <td>40</td>
+                        <td>17</td>
+                        <td>23</td>
+                        <td>42.5%</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>Miami Heretics</td>
+                        <td>40</td>
+                        <td>16</td>
+                        <td>24</td>
+                        <td>40.0%</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>Cloud9 New York</td>
+                        <td>40</td>
+                        <td>15</td>
+                        <td>25</td>
+                        <td>37.5%</td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>Los Angeles Guerrillas M8</td>
+                        <td>40</td>
+                        <td>14</td>
+                        <td>26</td>
+                        <td>35.0%</td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td>Las Vegas Falcons</td>
+                        <td>40</td>
+                        <td>13</td>
+                        <td>27</td>
+                        <td>32.5%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="content-section" id="matches-section">
+            <h2>Matches - Black Ops 6 Season</h2>
+            <div class="recent-match">
+                <h3>Most Recent Match</h3>
+                <div class="match-display">
+                    <span class="team-name">Atlanta FaZe</span>
+                    <span class="vs">vs</span>
+                    <span class="team-name">OpTic Texas</span>
+                </div>
+                <p><strong>Date:</strong> <span id="recent-match-date">February 26, 2025</span></p>
+                <p><strong>Result:</strong> <span id="recent-match-result">Atlanta FaZe won 3 - 1</span></p>
+            </div>
+            <div class="upcoming-match">
+                <h3>Next Upcoming Match</h3>
+                <div class="match-display">
+                    <span class="team-name">Los Angeles Thieves</span>
+                    <span class="vs">vs</span>
+                    <span class="team-name">Toronto Ultra</span>
+                </div>
+                <p><strong>Date:</strong> <span id="upcoming-match-date">March 1, 2025</span></p>
+                <p><strong>Time:</strong> <span id="upcoming-match-time">8:00 PM EST</span></p>
+            </div>
+        </div>
+
+        <div class="content-section" id="teams-section">
+            <h2>Teams - Black Ops 6 Season</h2>
+            <div id="atlanta-faze" class="team-roster">
+                <h3>Atlanta FaZe Roster</h3>
+                <ul>
+                    <li>aBeZy - Kills: 1435, Deaths: 1398, K/D Ratio: 1.027</li>
+                    <li>Cellium - Kills: 1424, Deaths: 1231, K/D Ratio: 1.157</li>
+                    <li>Simp - Kills: 1475, Deaths: 1338, K/D Ratio: 1.102</li>
+                    <li>Drazah - Kills: 1404, Deaths: 1371, K/D Ratio: 1.024</li>
+                </ul>
+            </div>
+            <div id="boston-breach" class="team-roster">
+                <h3>Boston Breach Roster</h3>
+                <ul>
+                    <li>Cammy - Kills: 1042, Deaths: 1116, K/D Ratio: 0.934</li>
+                    <li>Owakening - Kills: 990, Deaths: 1094, K/D Ratio: 0.905</li>
+                    <li>Purj - Kills: 1102, Deaths: 1189, K/D Ratio: 0.927</li>
+                    <li>Snoopy - Kills: 1189, Deaths: 1105, K/D Ratio: 1.076</li>
+                </ul>
+            </div>
+            <div id="carolina-royal-ravens" class="team-roster">
+                <h3>Carolina Royal Ravens Roster</h3>
+                <ul>
+                    <li>SlasheR - Kills: 1376, Deaths: 1357, K/D Ratio: 1.014</li>
+                    <li>Gwinn - Kills: 1577, Deaths: 1429, K/D Ratio: 1.104</li>
+                    <li>Vivid - Kills: 1384, Deaths: 1508, K/D Ratio: 0.918</li>
+                    <li>TJHaLy - Kills: 1517, Deaths: 1496, K/D Ratio: 1.014</li>
+                </ul>
+            </div>
+            <div id="los-angeles-guerrillas" class="team-roster">
+                <h3>Los Angeles Guerrillas M8 Roster</h3>
+                <ul>
+                    <li>KiSMET - Kills: 1048, Deaths: 997, K/D Ratio: 1.051</li>
+                    <li>Lynz - Kills: 1019, Deaths: 967, K/D Ratio: 1.054</li>
+                    <li>Skyz - Kills: 862, Deaths: 903, K/D Ratio: 0.955</li>
+                    <li>Lunarz - Kills: 138, Deaths: 137, K/D Ratio: 1.007</li>
+                </ul>
+            </div>
+            <div id="los-angeles-thieves" class="team-roster">
+                <h3>Los Angeles Thieves Roster</h3>
+                <ul>
+                    <li>Envoy - Kills: 1282, Deaths: 1252, K/D Ratio: 1.024</li>
+                    <li>Ghosty - Kills: 1248, Deaths: 1192, K/D Ratio: 1.047</li>
+                    <li>HyDra - Kills: 1365, Deaths: 1262, K/D Ratio: 1.082</li>
+                    <li>Scrappy - Kills: 1373, Deaths: 1224, K/D Ratio: 1.122</li>
+                </ul>
+            </div>
+            <div id="miami-heretics" class="team-roster">
+                <h3>Miami Heretics Roster</h3>
+                <ul>
+                    <li>Lucky - Kills: 1119, Deaths: 1240, K/D Ratio: 0.902</li>
+                    <li>MettalZ - Kills: 1107, Deaths: 1242, K/D Ratio: 0.891</li>
+                    <li>ReeaL - Kills: 1279, Deaths: 1277, K/D Ratio: 1.002</li>
+                    <li>RenKoR - Kills: 1240, Deaths: 1273, K/D Ratio: 0.974</li>
+                </ul>
+            </div>
+            <div id="minnesota-rokkr" class="team-roster">
+                <h3>Minnesota RØKKR Roster</h3>
+                <ul>
+                    <li>Estreal - Kills: 1440, Deaths: 1364, K/D Ratio: 1.056</li>
+                    <li>Gio - Kills: 1424, Deaths: 1335, K/D Ratio: 1.067</li>
+                    <li>Nero - Kills: 1522, Deaths: 1493, K/D Ratio: 1.019</li>
+                    <li>PaulEhx - Kills: 1293, Deaths: 1448, K/D Ratio: 0.893</li>
+                </ul>
+            </div>
+            <div id="cloud9-new-york" class="team-roster">
+                <h3>Cloud9 New York Roster</h3>
+                <ul>
+                    <li>Sib - Kills: 1049, Deaths: 1082, K/D Ratio: 0.970</li>
+                    <li>Attach - Kills: 1006, Deaths: 1048, K/D Ratio: 0.960</li>
+                    <li>Kremp - Kills: 1148, Deaths: 1100, K/D Ratio: 1.044</li>
+                    <li>Mack - Kills: 1127, Deaths: 1134, K/D Ratio: 0.994</li>
+                </ul>
+            </div>
+            <div id="optic-texas" class="team-roster">
+                <h3>OpTic Texas Roster</h3>
+                <ul>
+                    <li>Dashy - Kills: 1286, Deaths: 1228, K/D Ratio: 1.047</li>
+                    <li>Kenny - Kills: 1153, Deaths: 1326, K/D Ratio: 0.870</li>
+                    <li>Shotzzy - Kills: 1352, Deaths: 1216, K/D Ratio: 1.112</li>
+                    <li>Pred - Kills: 333, Deaths: 318, K/D Ratio: 1.047</li>
+                </ul>
+            </div>
+            <div id="toronto-ultra" class="team-roster">
+                <h3>Toronto Ultra Roster</h3>
+                <ul>
+                    <li>CleanX - Kills: 1258, Deaths: 1220, K/D Ratio: 1.031</li>
+                    <li>JoeDeceives - Kills: 1237, Deaths: 1200, K/D Ratio: 1.031</li>
+                    <li>Insight - Kills: 1042, Deaths: 1108, K/D Ratio: 0.940</li>
+                    <li>Beans - Kills: 1157, Deaths: 1138, K/D Ratio: 1.017</li>
+                </ul>
+            </div>
+            <div id="vegas-falcons" class="team-roster">
+                <h3>Vegas Falcons Roster</h3>
+                <ul>
+                    <li>Exnid - Kills: 842, Deaths: 919, K/D Ratio: 0.916</li>
+                    <li>d7oomx - Kills: 540, Deaths: 610, K/D Ratio: 0.885</li>
+                    <li>KiinG - Kills: 364, Deaths: 401, K/D Ratio: 0.908</li>
+                    <li>WXSL - Kills: 409, Deaths: 461, K/D Ratio: 0.887</li>
+                </ul>
+            </div>
+            <div id="vancouver-surge" class="team-roster">
+                <h3>Vancouver Surge Roster</h3>
+                <ul>
+                    <li>04 - Kills: 1098, Deaths: 1128, K/D Ratio: 0.973</li>
+                    <li>Abuzah - Kills: 1050, Deaths: 1114, K/D Ratio: 0.943</li>
+                    <li>Neptune - Kills: 317, Deaths: 270, K/D Ratio: 1.174</li>
+                    <li>Nastie - Kills: 1043, Deaths: 1061, K/D Ratio: 0.983</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulating real-time updates for player stats
+        function updateStats() {
+            // Update timestamp
+            const now = new Date();
+            const options = { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                timeZoneName: 'short'
+            };
+            document.getElementById('update-time').textContent = now.toLocaleDateString('en-US', options);
+            
+            // Add random slight changes to stats to simulate real-time updates
+            const kdElements = document.querySelectorAll('.kd-ratio');
+            kdElements.forEach(element => {
+                const currentValue = parseFloat(element.textContent);
+                const change = (Math.random() * 0.004) - 0.002; // Small random change
+                const newValue = (currentValue + change).toFixed(3);
+                element.textContent = newValue;
+                
+                // Update color based on value
+                if (parseFloat(newValue) >= 1.05) {
+                    element.className = 'kd-ratio positive';
+                } else if (parseFloat(newValue) < 0.95) {
+                    element.className = 'kd-ratio negative';
+                } else {
+                    element.className = 'kd-ratio';
+                }
+            });
+            
+            // Schedule next update
+            setTimeout(updateStats, 5000 + Math.random() * 10000); // Random interval between 5-15 seconds
+        }
+
+        // Function to update matches
+        function updateMatches() {
+            // Simulate fetching new match data
+            const recentMatchData = {
+                match: "Atlanta FaZe vs. OpTic Texas",
+                date: "February 26, 2025",
+                result: "Atlanta FaZe won 3 - 1"
+            };
+
+            const upcomingMatchData = {
+                match: "Los Angeles Thieves vs. Toronto Ultra",
+                date: "March 1, 2025",
+                time: "8:00 PM EST"
+            };
+
+            // Update the recent match information
+            document.getElementById('recent-match').textContent = recentMatchData.match;
+            document.getElementById('recent-match-date').textContent = recentMatchData.date;
+            document.getElementById('recent-match-result').textContent = recentMatchData.result;
+
+            // Update the upcoming match information
+            document.getElementById('upcoming-match').textContent = upcomingMatchData.match;
+            document.getElementById('upcoming-match-date').textContent = upcomingMatchData.date;
+            document.getElementById('upcoming-match-time').textContent = upcomingMatchData.time;
+        }
+
+        // Start the update processes
+        setInterval(updateMatches, 10000); // Update matches every 10 seconds
+        setTimeout(updateStats, 5000); // Start player stats updates
+
+        // Initialize tabs
+        const tabs = document.querySelectorAll('.tab');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        tabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Hide all content sections
+                contentSections.forEach(section => section.classList.remove('active'));
+                // Show the content for the active tab
+                contentSections[index].classList.add('active');
+            });
+        });
+        
+        // Updated search functionality
+        const searchInput = document.querySelector('.search-bar input');
+        searchInput.addEventListener('input', () => {
+            const filter = searchInput.value.toLowerCase();
+            const rows = document.querySelectorAll('#players-section .data-table tbody tr'); // Ensure we are targeting the correct table
+
+            rows.forEach(row => {
+                const playerName = row.querySelector('.player-name').textContent.toLowerCase();
+                if (playerName.includes(filter)) {
+                    row.style.display = ''; // Show the row if it matches
+                } else {
+                    row.style.display = 'none'; // Hide the row if it doesn't match
+                }
+            });
+        });
+    </script>
+</body>
+</html>
